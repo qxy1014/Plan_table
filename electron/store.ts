@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { app } from 'electron'
-import type { AllPlans, Task } from './types'
+import type { AllPlans, AppSettings, Task } from './types'
 
 const getDataPath = (): string => {
   const userDataPath = app.getPath('userData')
@@ -33,6 +33,31 @@ export function writePlans(allPlans: AllPlans): void {
 export function getWeekTasks(weekStart: string): Task[] {
   const all = readPlans()
   return all[weekStart] || []
+}
+
+const getSettingsPath = (): string => {
+  const userDataPath = app.getPath('userData')
+  return path.join(userDataPath, 'settings.json')
+}
+
+export function readSettings(): AppSettings {
+  const settingsPath = getSettingsPath()
+  try {
+    if (fs.existsSync(settingsPath)) {
+      const raw = fs.readFileSync(settingsPath, 'utf-8')
+      return JSON.parse(raw)
+    }
+  } catch { /* ignore */ }
+  return {}
+}
+
+export function writeSettings(settings: AppSettings): void {
+  const settingsPath = getSettingsPath()
+  const dir = path.dirname(settingsPath)
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true })
+  }
+  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8')
 }
 
 export function saveWeekTasks(weekStart: string, tasks: Task[]): void {

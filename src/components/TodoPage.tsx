@@ -16,7 +16,7 @@ function saveTodos(todos: TodoItem[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
 }
 
-export default function TodoPage() {
+export default function TodoPage({ backgroundImage }: { backgroundImage: string }) {
   const [todos, setTodos] = useState<TodoItem[]>([])
   const [input, setInput] = useState('')
   const [loaded, setLoaded] = useState(false)
@@ -65,12 +65,11 @@ export default function TodoPage() {
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden">
-      {/* 五条悟背景图 */}
+      {/* 自定义背景图 */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage:
-            'url(https://wallpapercave.com/wp/wp14028824.jpg)',
+          backgroundImage: `url(${backgroundImage})`,
         }}
       />
       {/* 遮罩层 */}

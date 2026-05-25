@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, Menu } from 'electron'
 import path from 'path'
-import { getWeekTasks, saveWeekTasks } from './store'
+import { getWeekTasks, saveWeekTasks, readSettings, writeSettings } from './store'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -83,5 +83,14 @@ ipcMain.handle('get-week-tasks', async (_event, weekStart: string) => {
 
 ipcMain.handle('save-week-tasks', async (_event, weekStart: string, tasks: unknown[]) => {
   saveWeekTasks(weekStart, tasks as any[])
+  return { success: true }
+})
+
+ipcMain.handle('get-settings', async () => {
+  return readSettings()
+})
+
+ipcMain.handle('save-settings', async (_event, settings: unknown) => {
+  writeSettings(settings as any)
   return { success: true }
 })

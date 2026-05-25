@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { Task } from './types'
+import type { AppSettings, Task } from './types'
 import { getMonday } from './utils/dateUtils'
 import WeekNavigator from './components/WeekNavigator'
 import WeekView from './components/WeekView'
 import TaskDialog from './components/TaskDialog'
 import TodoPage from './components/TodoPage'
+import BackgroundSettings from './components/BackgroundSettings'
 
 async function loadWeekTasks(weekStart: string): Promise<Task[]> {
   if (window.electronAPI) {
@@ -38,6 +39,27 @@ async function persistWeekTasks(weekStart: string, tasks: Task[]): Promise<void>
   }
 }
 
+async function loadSettings(): Promise<AppSettings> {
+  if (window.electronAPI) {
+    return window.electronAPI.getSettings()
+  }
+  const saved = localStorage.getItem('plan-table-settings')
+  if (saved) {
+    try { return JSON.parse(saved) } catch { /* */ }
+  }
+  return {}
+}
+
+async function saveSettings(settings: AppSettings): Promise<void> {
+  if (window.electronAPI) {
+    await window.electronAPI.saveSettings(settings)
+  } else {
+    localStorage.setItem('plan-table-settings', JSON.stringify(settings))
+  }
+}
+
+const DEFAULT_BG = './4096x2626.jpg'
+
 export default function App() {
   const currentMonday = getMonday(new Date()).toISOString()
   const [weekStart, setWeekStart] = useState(currentMonday)
@@ -49,10 +71,17 @@ export default function App() {
   const [defaultStartM, setDefaultStartM] = useState(0)
   const [loaded, setLoaded] = useState(false)
   const [page, setPage] = useState<'week' | 'todo'>('week')
+  const [backgroundImage, setBackgroundImage] = useState(DEFAULT_BG)
 
   useEffect(() => {
-    loadWeekTasks(currentMonday).then((t) => {
+    Promise.all([
+      loadWeekTasks(currentMonday),
+      loadSettings(),
+    ]).then(([t, settings]) => {
       setTasks(t)
+      if (settings.backgroundImage) {
+        setBackgroundImage(settings.backgroundImage)
+      }
       setLoaded(true)
     })
   }, [])
@@ -122,6 +151,16 @@ export default function App() {
     setEditingTask(null)
   }
 
+  const handleSetBackground = async (dataUrl: string) => {
+    setBackgroundImage(dataUrl)
+    await saveSettings({ backgroundImage: dataUrl })
+  }
+
+  const handleResetBackground = async () => {
+    setBackgroundImage(DEFAULT_BG)
+    await saveSettings({ backgroundImage: '' })
+  }
+
   if (!loaded) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
@@ -154,13 +193,20 @@ export default function App() {
         >
           ✅ 待办
         </button>
+        <div className="pr-2 flex items-center">
+          <BackgroundSettings
+            backgroundImage={backgroundImage}
+            onSetBackground={handleSetBackground}
+            onResetBackground={handleResetBackground}
+          />
+        </div>
       </div>
 
       {page === 'week' ? (
         <div
           className="flex-1 flex flex-col overflow-hidden"
           style={{
-            backgroundImage: `url('./4096x2626.jpg')`,
+            backgroundImage: `url(${backgroundImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
@@ -196,7 +242,7 @@ export default function App() {
         </div>
       ) : (
         <div className="flex-1 overflow-hidden">
-          <TodoPage />
+          <TodoPage backgroundImage={backgroundImage} />
         </div>
       )}
     </div>

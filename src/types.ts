@@ -13,12 +13,18 @@ export interface Task {
 export interface ElectronAPI {
   getWeekTasks: (weekStart: string) => Promise<Task[]>
   saveWeekTasks: (weekStart: string, tasks: Task[]) => Promise<{ success: boolean }>
+  getSettings: () => Promise<AppSettings>
+  saveSettings: (settings: AppSettings) => Promise<{ success: boolean }>
 }
 
 declare global {
   interface Window {
     electronAPI?: ElectronAPI
   }
+}
+
+export interface AppSettings {
+  backgroundImage?: string // base64 data URL or empty
 }
 
 export const DAY_LABELS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
