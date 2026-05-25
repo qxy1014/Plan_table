@@ -12,6 +12,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `npm start` | 构建 Electron 后直接启动桌面应用 |
 | `npm run pack` | 构建并打包为便携版 exe（输出到 `release/`） |
 | `npm run pack:installer` | 构建并打包为 NSIS 安装器 exe |
+| `gh repo create` | 在 GitHub 创建仓库（加 `--push` 自动推送，`--public`/`--private` 控制可见性） |
+
+## Git 工作流
+
+- 使用 `gh repo create` + `git push` 即可完成仓库创建和代码推送，无需手动在 GitHub 网页操作。
+- 远程仓库：`https://github.com/qxy1014/Plan_table.git`
 
 ## 架构
 
