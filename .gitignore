@@ -1,0 +1,21 @@
+# 依赖
+node_modules/
+
+# 构建输出
+dist/
+dist-electron/
+release/
+
+# 根目录截图和参考图
+/*.png
+/*.jpg
+
+# Playwright 测试产物
+.playwright-mcp/
+
+# Claude 配置
+.claude/
+
+# 系统文件
+.DS_Store
+Thumbs.db
